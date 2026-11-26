@@ -1,0 +1,68 @@
+﻿@model List<Evento>
+@{
+    ViewData["Title"] = "Calendario de Eventos";
+    DateTime mes = ViewBag.Mes;
+    var offset = ((int)mes.DayOfWeek + 6) % 7; // semana inicia en lunes
+    var dias = DateTime.DaysInMonth(mes.Year, mes.Month);
+    var proximos = (List<Evento>)ViewBag.Proximos;
+}
+
+<h1>Calendario de Eventos</h1>
+
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <a class="btn btn-outline-secondary" asp-route-anio="@(((DateTime)ViewBag.Anterior).Year)" asp-route-mes="@(((DateTime)ViewBag.Anterior).Month)">&laquo;</a>
+    <h4 class="m-0">@mes.ToString("MMMM yyyy")</h4>
+    <a class="btn btn-outline-secondary" asp-route-anio="@(((DateTime)ViewBag.Siguiente).Year)" asp-route-mes="@(((DateTime)ViewBag.Siguiente).Month)">&raquo;</a>
+</div>
+
+<table class="table table-bordered" style="table-layout:fixed">
+    <thead><tr>@foreach (var d in new[] { "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom" }) { <th class="text-center">@d</th> }</tr></thead>
+    <tbody>
+    @for (int celda = 0; celda < offset + dias; celda += 7)
+    {
+        <tr>
+        @for (int c = celda; c < celda + 7; c++)
+        {
+            var dia = c - offset + 1;
+            if (dia < 1 || dia > dias) { <td class="bg-light"></td>; continue; }
+            var fecha = new DateTime(mes.Year, mes.Month, dia);
+            <td style="height:90px; vertical-align:top" class="@(fecha == DateTime.Today ? "table-primary" : "")">
+                <strong>@dia</strong>
+                @foreach (var e in Model.Where(x => x.Inicio.Date == fecha))
+                {
+                    <div class="small"><a asp-action="Editar" asp-route-id="@e.Id">@e.Inicio.ToString("HH:mm") @e.Titulo</a></div>
+                }
+            </td>
+        }
+        </tr>
+    }
+    </tbody>
+</table>
+
+<h5>Nuevo evento</h5>
+<form asp-action="Guardar" method="post" class="row g-2 mb-4">
+    <div class="col-md-4"><input name="Titulo" class="form-control" placeholder="Título" required /></div>
+    <div class="col-md-3"><input name="Inicio" type="datetime-local" class="form-control" required /></div>
+    <div class="col-md-3">
+        <select name="RecordatorioMin" class="form-select">
+            <option value="0">Sin recordatorio</option><option value="5">5 min antes</option>
+            <option value="15" selected>15 min antes</option><option value="60">1 hora antes</option>
+        </select>
+    </div>
+    <div class="col-md-2"><button class="btn btn-primary w-100">Agregar</button></div>
+</form>
+
+<script>
+    // Notificaciones/recordatorios del navegador para los próximos eventos
+    const eventos = [@Html.Raw(string.Join(",", proximos.Where(e => e.RecordatorioMin > 0).Select(e =>
+        $"{{t:\"{e.Titulo.Replace("\\", "\\\\").Replace("\"", "\\\"")}\",ms:{new DateTimeOffset(e.Inicio.AddMinutes(-e.RecordatorioMin)).ToUnixTimeMilliseconds()}}}")))];
+    if ("Notification" in window && Notification.permission === "default") Notification.requestPermission();
+    eventos.forEach(ev => {
+        const espera = ev.ms - Date.now();
+        if (espera > 0 && espera < 2147483647)
+            setTimeout(() => {
+                if (Notification.permission === "granted") new Notification("Recordatorio", { body: ev.t });
+                else alert("Recordatorio: " + ev.t);
+            }, espera);
+    });
+</script>

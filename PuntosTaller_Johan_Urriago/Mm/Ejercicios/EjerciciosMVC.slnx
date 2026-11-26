@@ -1,0 +1,13 @@
+<Solution>
+  <Project Path="01_ListaTareas/01_ListaTareas.csproj" />
+  <Project Path="02_CalculadoraPropinas/02_CalculadoraPropinas.csproj" />
+  <Project Path="03_GeneradorContrasenas/03_GeneradorContrasenas.csproj" />
+  <Project Path="04_GestorGastos/04_GestorGastos.csproj" />
+  <Project Path="05_SistemaReservas/05_SistemaReservas.csproj" />
+  <Project Path="06_GestorNotas/06_GestorNotas.csproj" />
+  <Project Path="07_CalendarioEventos/07_CalendarioEventos.csproj" />
+  <Project Path="08_PlataformaRecetas/08_PlataformaRecetas.csproj" />
+  <Project Path="09_JuegoMemoria/09_JuegoMemoria.csproj" />
+  <Project Path="10_PlataformaEncuestas/10_PlataformaEncuestas.csproj" />
+  <Project Path="11_CronometroOnline/11_CronometroOnline.csproj" />
+</Solution>

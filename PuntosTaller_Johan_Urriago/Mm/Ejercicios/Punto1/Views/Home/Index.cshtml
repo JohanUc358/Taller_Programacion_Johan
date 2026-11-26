@@ -1,0 +1,25 @@
+@model IReadOnlyList<Tarea>
+@{ ViewData["Title"] = "Lista de Tareas"; }
+
+<h1>Lista de Tareas</h1>
+
+<form asp-action="Agregar" method="post" class="input-group mb-3">
+    <input name="titulo" class="form-control" placeholder="Nueva tarea..." required />
+    <button class="btn btn-primary">Agregar</button>
+</form>
+
+<ul class="list-group">
+@foreach (var t in Model)
+{
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+        <span class="@(t.Completada ? "text-decoration-line-through text-muted" : "")">@t.Titulo</span>
+        <span class="d-flex gap-2">
+            <form asp-action="Completar" method="post"><input type="hidden" name="id" value="@t.Id" />
+                <button class="btn btn-sm btn-success">@(t.Completada ? "Reabrir" : "Completar")</button></form>
+            <form asp-action="Eliminar" method="post"><input type="hidden" name="id" value="@t.Id" />
+                <button class="btn btn-sm btn-danger">Eliminar</button></form>
+        </span>
+    </li>
+}
+</ul>
+@if (!Model.Any()) { <p class="text-muted">No hay tareas todavía.</p> }

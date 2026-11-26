@@ -1,0 +1,26 @@
+﻿@model IReadOnlyList<Encuesta>
+@{ ViewData["Title"] = "Plataforma de Encuestas"; }
+
+<h1>Plataforma de Encuestas</h1>
+@if (ViewBag.Error != null) { <div class="alert alert-danger">@ViewBag.Error</div> }
+
+<form asp-action="Crear" method="post" class="card card-body mb-4">
+    <input name="pregunta" class="form-control mb-2" placeholder="Pregunta de la encuesta" required />
+    <textarea name="opciones" class="form-control mb-2" rows="4" placeholder="Una opción por línea (mínimo 2)" required></textarea>
+    <button class="btn btn-primary">Crear encuesta</button>
+</form>
+
+<ul class="list-group">
+@foreach (var e in Model)
+{
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+        <span>@e.Pregunta <span class="badge bg-secondary">@e.Total votos</span></span>
+        <span class="d-flex gap-2">
+            <a asp-action="Responder" asp-route-id="@e.Id" class="btn btn-sm btn-primary">Responder</a>
+            <a asp-action="Resultados" asp-route-id="@e.Id" class="btn btn-sm btn-outline-secondary">Resultados</a>
+            <form asp-action="Eliminar" method="post"><input type="hidden" name="id" value="@e.Id" /><button class="btn btn-sm btn-danger">X</button></form>
+        </span>
+    </li>
+}
+</ul>
+@if (!Model.Any()) { <p class="text-muted">Aún no hay encuestas.</p> }

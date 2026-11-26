@@ -1,0 +1,49 @@
+﻿@model List<Receta>
+@{ ViewData["Title"] = "Plataforma de Recetas"; }
+
+<h1>Plataforma de Recetas</h1>
+
+<form method="get" class="row g-2 mb-4">
+    <div class="col-md-3"><input name="q" value="@ViewBag.Q" class="form-control" placeholder="Nombre de la receta" /></div>
+    <div class="col-md-3">
+        <select name="tipo" class="form-select">
+            <option value="">Todos los tipos</option>
+            @foreach (var t in LibroRecetas.Tipos) { <option selected="@(t == (string?)ViewBag.Tipo)">@t</option> }
+        </select>
+    </div>
+    <div class="col-md-3"><input name="ingrediente" value="@ViewBag.Ingrediente" class="form-control" placeholder="Ingrediente" /></div>
+    <div class="col-md-2 d-flex align-items-center">
+        <div class="form-check"><input type="checkbox" name="guardadas" value="true" class="form-check-input" checked="@((bool)ViewBag.Guardadas)" /><label class="form-check-label">Guardadas</label></div>
+    </div>
+    <div class="col-md-1"><button class="btn btn-secondary w-100">Ir</button></div>
+</form>
+
+<div class="row">
+@foreach (var r in Model)
+{
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <span class="badge bg-warning text-dark">@r.Tipo</span> @(r.Guardada ? "⭐" : "")
+                <h5 class="mt-2">@r.Nombre</h5>
+                <p class="small text-muted">@string.Join(", ", r.ListaIngredientes())</p>
+                <a asp-action="Detalle" asp-route-id="@r.Id" class="btn btn-sm btn-primary">Ver receta</a>
+            </div>
+        </div>
+    </div>
+}
+</div>
+@if (!Model.Any()) { <p class="text-muted">No se encontraron recetas.</p> }
+
+<hr />
+<h5>Compartir una receta</h5>
+<form asp-action="Crear" method="post" class="row g-2">
+    <div class="col-md-4"><input name="Nombre" class="form-control" placeholder="Nombre" required /></div>
+    <div class="col-md-3">
+        <select name="Tipo" class="form-select">@foreach (var t in LibroRecetas.Tipos) { <option>@t</option> }</select>
+    </div>
+    <div class="col-md-5"><input name="Autor" class="form-control" placeholder="Tu nombre" /></div>
+    <div class="col-12"><input name="Ingredientes" class="form-control" placeholder="Ingredientes separados por coma" required /></div>
+    <div class="col-12"><textarea name="Preparacion" class="form-control" rows="3" placeholder="Preparación"></textarea></div>
+    <div class="col-12"><button class="btn btn-primary">Publicar receta</button></div>
+</form>

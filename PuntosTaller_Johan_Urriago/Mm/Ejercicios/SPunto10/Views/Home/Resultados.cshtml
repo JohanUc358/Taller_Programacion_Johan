@@ -1,0 +1,19 @@
+@model Encuesta
+@{ ViewData["Title"] = "Resultados"; }
+
+<h1>@Model.Pregunta</h1>
+<p class="text-muted">Total de votos: @Model.Total</p>
+
+@for (int i = 0; i < Model.Opciones.Count; i++)
+{
+    var pct = Model.Porcentaje(i);
+    <div class="mb-3">
+        <div class="d-flex justify-content-between"><span>@Model.Opciones[i]</span><span>@Model.Votos[i] votos (@pct.ToString("0.#")%)</span></div>
+        <div class="progress" style="height:24px">
+            <div class="progress-bar" style="width:@pct.ToString(System.Globalization.CultureInfo.InvariantCulture)%"></div>
+        </div>
+    </div>
+}
+
+<a asp-action="Responder" asp-route-id="@Model.Id" class="btn btn-primary">Votar de nuevo</a>
+<a asp-action="Index" class="btn btn-link">Volver</a>

@@ -1,0 +1,49 @@
+﻿@model CronometroModel
+@{ ViewData["Title"] = Model.Titulo; }
+
+<h1>@Model.Titulo</h1>
+<div class="display-1 font-monospace text-center my-4" id="pantalla">@Model.TiempoInicial</div>
+
+<div class="d-flex justify-content-center gap-2 mb-4">
+    <button class="btn btn-success" id="inicio">Iniciar</button>
+    <button class="btn btn-warning" id="pausa" disabled>Pausar</button>
+    <button class="btn btn-info" id="vuelta" disabled>Vuelta</button>
+    <button class="btn btn-danger" id="reinicio">Reiniciar</button>
+</div>
+
+<table class="table w-50 mx-auto">
+    <thead><tr><th>#</th><th>Parcial</th><th>Total</th></tr></thead>
+    <tbody id="vueltas"></tbody>
+</table>
+
+<script>
+    let acumulado = 0, inicio = 0, intervalo = null, ultimaVuelta = 0, n = 0;
+    const $ = id => document.getElementById(id);
+    const fmt = ms => {
+        const m = Math.floor(ms / 60000), s = Math.floor(ms / 1000) % 60, c = Math.floor(ms % 1000 / 10);
+        return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}.${String(c).padStart(2, "0")}`;
+    };
+    const actual = () => acumulado + (intervalo ? Date.now() - inicio : 0);
+    const pintar = () => $("pantalla").innerText = fmt(actual());
+
+    $("inicio").onclick = () => {
+        if (intervalo) return;
+        inicio = Date.now(); intervalo = setInterval(pintar, 30);
+        $("inicio").disabled = true; $("pausa").disabled = false; $("vuelta").disabled = false;
+    };
+    $("pausa").onclick = () => {
+        acumulado = actual(); clearInterval(intervalo); intervalo = null; pintar();
+        $("inicio").disabled = false; $("inicio").innerText = "Continuar"; $("pausa").disabled = true; $("vuelta").disabled = true;
+    };
+    $("vuelta").onclick = () => {
+        const total = actual();
+        const fila = $("vueltas").insertRow(0);
+        fila.insertCell().innerText = ++n; fila.insertCell().innerText = fmt(total - ultimaVuelta); fila.insertCell().innerText = fmt(total);
+        ultimaVuelta = total;
+    };
+    $("reinicio").onclick = () => {
+        clearInterval(intervalo); intervalo = null; acumulado = 0; ultimaVuelta = 0; n = 0;
+        $("vueltas").innerHTML = ""; pintar();
+        $("inicio").disabled = false; $("inicio").innerText = "Iniciar"; $("pausa").disabled = true; $("vuelta").disabled = true;
+    };
+</script>

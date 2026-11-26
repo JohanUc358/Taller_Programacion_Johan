@@ -1,0 +1,50 @@
+﻿@model List<Gasto>
+@{ ViewData["Title"] = "Gestor de Gastos"; }
+
+<h1>Gestor de Gastos</h1>
+
+<form asp-action="Agregar" method="post" class="row g-2 mb-4">
+    <div class="col-md-3"><input name="Descripcion" class="form-control" placeholder="Descripción" required /></div>
+    <div class="col-md-2"><input name="Monto" type="number" step="0.01" min="0.01" class="form-control" placeholder="Monto" required /></div>
+    <div class="col-md-3">
+        <select name="Categoria" class="form-select">
+            @foreach (var c in RepositorioGastos.Categorias) { <option>@c</option> }
+        </select>
+    </div>
+    <div class="col-md-2"><input name="Fecha" type="date" value="@DateTime.Today.ToString("yyyy-MM-dd")" class="form-control" /></div>
+    <div class="col-md-2"><button class="btn btn-primary w-100">Registrar</button></div>
+</form>
+
+<div class="row">
+    <div class="col-md-8">
+        <table class="table">
+            <thead><tr><th>Fecha</th><th>Descripción</th><th>Categoría</th><th class="text-end">Monto</th><th></th></tr></thead>
+            <tbody>
+            @foreach (var g in Model)
+            {
+                <tr>
+                    <td>@g.Fecha.ToString("yyyy-MM-dd")</td><td>@g.Descripcion</td><td>@g.Categoria</td>
+                    <td class="text-end">@g.Monto.ToString("C")</td>
+                    <td><form asp-action="Eliminar" method="post"><input type="hidden" name="id" value="@g.Id" /><button class="btn btn-sm btn-danger">X</button></form></td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+    <div class="col-md-4">
+        <h5>Resumen mensual</h5>
+        <ul class="list-group mb-3">
+            @foreach (var m in (List<(string Mes, decimal Total)>)ViewBag.Mensual)
+            {
+                <li class="list-group-item d-flex justify-content-between"><span>@m.Mes</span><strong>@m.Total.ToString("C")</strong></li>
+            }
+        </ul>
+        <h5>Por categoría (@ViewBag.MesActual)</h5>
+        <ul class="list-group">
+            @foreach (var c in (List<(string Categoria, decimal Total)>)ViewBag.PorCategoria)
+            {
+                <li class="list-group-item d-flex justify-content-between"><span>@c.Categoria</span><strong>@c.Total.ToString("C")</strong></li>
+            }
+        </ul>
+    </div>
+</div>

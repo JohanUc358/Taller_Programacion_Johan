@@ -1,0 +1,18 @@
+@model Receta
+@{ ViewData["Title"] = Model.Nombre; }
+
+<h1>@Model.Nombre <small class="badge bg-warning text-dark fs-6">@Model.Tipo</small></h1>
+<p class="text-muted">Por @Model.Autor</p>
+
+<h5>Ingredientes</h5>
+<ul>@foreach (var i in Model.ListaIngredientes()) { <li>@i</li> }</ul>
+
+<h5>Preparación</h5>
+<p style="white-space:pre-wrap">@Model.Preparacion</p>
+
+<div class="d-flex gap-2">
+    <form asp-action="Guardar" method="post"><input type="hidden" name="id" value="@Model.Id" />
+        <button class="btn btn-outline-primary">@(Model.Guardada ? "Quitar de guardadas" : "Guardar receta")</button></form>
+    <button class="btn btn-outline-secondary" onclick="navigator.clipboard.writeText(location.href); this.innerText='¡Enlace copiado!'">Compartir</button>
+    <a asp-action="Index" class="btn btn-link">Volver</a>
+</div>

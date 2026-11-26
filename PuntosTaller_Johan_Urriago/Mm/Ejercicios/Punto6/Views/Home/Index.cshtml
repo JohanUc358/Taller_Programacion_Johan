@@ -1,0 +1,45 @@
+﻿@model List<Nota>
+@{ ViewData["Title"] = "Gestor de Notas"; }
+
+<h1>Gestor de Notas</h1>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-6"><input name="q" value="@ViewBag.Q" class="form-control" placeholder="Buscar en título o contenido..." /></div>
+    <div class="col-md-4">
+        <select name="categoria" class="form-select">
+            <option value="">Todas las categorías</option>
+            @foreach (var c in (List<string>)ViewBag.Categorias) { <option selected="@(c == (string?)ViewBag.Categoria)">@c</option> }
+        </select>
+    </div>
+    <div class="col-md-2"><button class="btn btn-secondary w-100">Buscar</button></div>
+</form>
+
+<form asp-action="Guardar" method="post" class="card card-body mb-4">
+    <div class="row g-2">
+        <div class="col-md-8"><input name="Titulo" class="form-control" placeholder="Título" required /></div>
+        <div class="col-md-4"><input name="Categoria" class="form-control" placeholder="Categoría (ej. Trabajo)" list="cats" />
+            <datalist id="cats">@foreach (var c in (List<string>)ViewBag.Categorias) { <option value="@c"></option> }</datalist></div>
+        <div class="col-12"><textarea name="Contenido" class="form-control" rows="3" placeholder="Escribe tu nota..."></textarea></div>
+        <div class="col-12"><button class="btn btn-primary">Guardar nota</button></div>
+    </div>
+</form>
+
+<div class="row">
+@foreach (var n in Model)
+{
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <span class="badge bg-info text-dark">@n.Categoria</span>
+                <h5 class="card-title mt-2">@n.Titulo</h5>
+                <p class="card-text" style="white-space:pre-wrap">@n.Contenido</p>
+            </div>
+            <div class="card-footer d-flex justify-content-between align-items-center">
+                <small class="text-muted">@n.Creada.ToString("dd/MM/yyyy HH:mm")</small>
+                <form asp-action="Eliminar" method="post"><input type="hidden" name="id" value="@n.Id" /><button class="btn btn-sm btn-danger">Eliminar</button></form>
+            </div>
+        </div>
+    </div>
+}
+</div>
+@if (!Model.Any()) { <p class="text-muted">No hay notas que mostrar.</p> }

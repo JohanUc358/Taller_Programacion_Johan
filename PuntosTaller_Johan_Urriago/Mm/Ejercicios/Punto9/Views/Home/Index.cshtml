@@ -1,0 +1,71 @@
+﻿@model List<string>
+@{ ViewData["Title"] = "Juego de Memoria"; string nivel = ViewBag.Nivel; }
+
+<style>
+    .tablero { display: grid; grid-template-columns: repeat(@(Model.Count == 24 ? 6 : 4), 80px); gap: 10px; }
+    .carta { width: 80px; height: 80px; font-size: 2.2rem; border: 0; border-radius: 10px; background: #0d6efd; color: transparent; }
+    .carta.abierta { background: #fff; color: #000; border: 2px solid #0d6efd; }
+    .carta.par { background: #d1e7dd; color: #000; border: 2px solid #198754; }
+</style>
+
+<h1>Juego de Memoria</h1>
+<div class="btn-group mb-3">
+    @foreach (var n in Juego.Niveles.Keys) { <a class="btn @(n == nivel ? "btn-primary" : "btn-outline-primary")" asp-route-nivel="@n">@n</a> }
+</div>
+<p>Intentos: <strong id="intentos">0</strong> · Tiempo: <strong id="tiempo">0</strong>s</p>
+
+<div class="row">
+    <div class="col-md-7">
+        <div class="tablero" id="tablero">
+            @for (int i = 0; i < Model.Count; i++) { <button class="carta" data-v="@Model[i]">?</button> }
+        </div>
+        <div id="fin" class="alert alert-success mt-3 d-none">
+            <p id="msg"></p>
+            <div class="input-group">
+                <input id="jugador" class="form-control" placeholder="Tu nombre" />
+                <button class="btn btn-success" id="guardar">Guardar puntaje</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-5">
+        <h5>Mejores puntajes</h5>
+        <ol>
+        @foreach (var p in (List<Puntaje>)ViewBag.Mejores) { <li>@p.Jugador — @p.Puntos pts (@p.Nivel, @p.Intentos intentos, @p.Segundos s)</li> }
+        </ol>
+    </div>
+</div>
+
+<script>
+    const nivel = "@nivel";
+    const cartas = [...document.querySelectorAll(".carta")];
+    let abiertas = [], intentos = 0, pares = 0, seg = 0, timer = null, bloqueo = false;
+
+    cartas.forEach(c => c.addEventListener("click", () => {
+        if (bloqueo || c.classList.contains("abierta") || c.classList.contains("par")) return;
+        if (!timer) timer = setInterval(() => document.getElementById("tiempo").innerText = ++seg, 1000);
+        c.classList.add("abierta"); c.innerText = c.dataset.v; abiertas.push(c);
+        if (abiertas.length < 2) return;
+
+        intentos++; document.getElementById("intentos").innerText = intentos;
+        const [a, b] = abiertas; abiertas = [];
+        if (a.dataset.v === b.dataset.v) {
+            [a, b].forEach(x => { x.classList.remove("abierta"); x.classList.add("par"); });
+            if (++pares === cartas.length / 2) terminar();
+        } else {
+            bloqueo = true;
+            setTimeout(() => { [a, b].forEach(x => { x.classList.remove("abierta"); x.innerText = "?"; }); bloqueo = false; }, 800);
+        }
+    }));
+
+    function terminar() {
+        clearInterval(timer);
+        document.getElementById("msg").innerText = `¡Ganaste en ${intentos} intentos y ${seg} segundos!`;
+        document.getElementById("fin").classList.remove("d-none");
+    }
+
+    document.getElementById("guardar").addEventListener("click", async () => {
+        const datos = new URLSearchParams({ jugador: document.getElementById("jugador").value, nivel, intentos, segundos: seg });
+        await fetch("/Home/Puntaje", { method: "POST", body: datos });
+        location.reload();
+    });
+</script>
